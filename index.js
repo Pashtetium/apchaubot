@@ -5,7 +5,7 @@ import {getRandomInt} from './randomInt.js'
 dotenv.config()
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
-bot.inlineQuery([], (ctx) => {
+bot.inlineQuery('',(ctx) => {
     const apchuSize = getRandomInt(3, 40)
     let answer = `Сегодня ты дал ${apchuSize} сантиметровый апчу`
   
