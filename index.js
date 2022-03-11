@@ -11,6 +11,7 @@ bot.inlineQuery([''], (ctx) => {
   
     ctx.answerInlineQuery([
       {
+        id: '1',
         type: 'article',
         title: 'Апщу бер',
         input_message_content: {
