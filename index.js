@@ -6,7 +6,7 @@ dotenv.config()
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
 bot.inlineQuery(['a'], (ctx) => {
-    const apchuSize = getRandomInt(3, 40)
+    let apchuSize = getRandomInt(3, 40)
     let answer = `Сегодня ты дал ${apchuSize} сантиметровый апчу`
   
     ctx.answerInlineQuery([
