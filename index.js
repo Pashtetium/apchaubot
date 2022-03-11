@@ -8,8 +8,17 @@ const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.on('inline_query', (ctx) => {
     const apchuSize = getRandomInt(63, 40)
     let answer = `Сегодня ты дал ${apchuSize} сантиметровый апчу`
-
-    ctx.answerInlineQuery(answer)
+  
+    ctx.answerInlineQuery([
+      {
+        type: 'article',
+        title: 'Апщу бер',
+        input_message_content: {
+          message_text: answer,
+        },
+        description: 'Покажет, насколько большой у тебя апщу'
+      }      
+    ])
   })
 
 bot.launch()
