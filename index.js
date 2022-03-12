@@ -10,7 +10,7 @@ bot.on('inline_query', (ctx) => {
     let apchuSize = getApchuSize()
     let emoji = getEmoji(apchuSize)
 
-    let answer = `Сегодня ты дал Апщу на - ${apchuSize} см ${emoji}`
+    let answer = `Сегодня ты дал Апщу на ${apchuSize}см. ${emoji}`
 
     ctx.answerInlineQuery([      
       {
