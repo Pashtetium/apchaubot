@@ -1,12 +1,12 @@
 import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
-import {getRandomInt} from './randomInt.js'
+import { getApchuSize } from './randomInt.js'
 
 dotenv.config()
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
 bot.on('inline_query', (ctx) => {
-    let apchuSize = getRandomInt(3, 40)
+    let apchuSize = getApchuSize()
     let answer = `Сегодня ты дал ${apchuSize} сантиметровый апчу`
 
     ctx.answerInlineQuery([      
@@ -19,7 +19,7 @@ bot.on('inline_query', (ctx) => {
         },
         description: 'Покажет, насколько большой у тебя апщу',
       } 
-    ], { is_personal: true })
+    ], { is_personal: true, cache_time: 43200 })
   })
 
 bot.launch()
