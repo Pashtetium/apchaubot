@@ -22,7 +22,7 @@ bot.on('inline_query', (ctx) => {
         },
         description: 'Покажет, насколько большой у тебя апщу',
       } 
-    ], { is_personal: true, cache_time: 1 })
+    ], { is_personal: true })
   })
 
 bot.launch()
