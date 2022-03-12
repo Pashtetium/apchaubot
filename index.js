@@ -8,10 +8,12 @@ const bot = new Telegraf(process.env.BOT_TOKEN)
 
 bot.on('inline_query', (ctx) => {
     let apchuSize = getApchuSize()
+    console.log('apchuSize = ' + apchuSize)
     let emoji = getEmoji(apchuSize)
+    console.log('emoji = ' + emoji)
 
     let answer = `Сегодня ты дал Апщу на ${apchuSize}см. ${emoji}`
-
+    console.log('answer = ' + answer)
     ctx.answerInlineQuery([      
       {
         id: '1',
