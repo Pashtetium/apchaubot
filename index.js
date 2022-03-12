@@ -1,13 +1,16 @@
 import dotenv from 'dotenv'
 import { Telegraf } from 'telegraf'
-import { getApchuSize } from './randomInt.js'
+import { getApchuSize } from './apchuSize.js'
+import { getEmoji } from './emoji.js'
 
 dotenv.config()
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
 bot.on('inline_query', (ctx) => {
     let apchuSize = getApchuSize()
-    let answer = `Сегодня ты дал ${apchuSize} сантиметровый апчу`
+    let emoji = getEmoji(apchuSize)
+
+    let answer = `Сегодня ты дал Апщу на - ${apchuSize} см ${emoji}`
 
     ctx.answerInlineQuery([      
       {
