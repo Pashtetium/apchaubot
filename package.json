@@ -19,6 +19,7 @@
     "telegraf": "^4.7.0",
     "dotenv": "^16.0.0",
     "@types/node": "^18.15.11",
-    "typegram": "^5.0.0"
+    "typegram": "^5.0.0",
+    "mongodb": "^5.1.0"
   }
 }
