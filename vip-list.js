@@ -5,4 +5,6 @@ export const vipList = [
   "sugarbeiby",
   "kavelpim123",
   "ddarzox",
+  "acoool",
+  "biqontie"
 ];
