@@ -6,5 +6,8 @@ export const vipList = [
   "kavelpim123",
   "ddarzox",
   "acoool",
-  "biqontie"
+  "biqontie",
+  "DihanB",
+  "A3300532",
+  "SagnaAlvarez",
 ];
