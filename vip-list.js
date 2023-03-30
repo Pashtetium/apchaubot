@@ -10,4 +10,5 @@ export const vipList = [
   "DihanB",
   "A3300532",
   "SagnaAlvarez",
+  "maskoffffff"
 ];
