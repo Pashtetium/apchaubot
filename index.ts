@@ -5,13 +5,12 @@ import { getEmoji } from "./emoji.js";
 import { vipList } from "./vip-list.js";
 
 dotenv.config();
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN ?? "");
 
 bot.on("inline_query", (ctx) => {
   let apchuSize = getApchuSize();
   const emoji = getEmoji(apchuSize);
-  const isVipKazakh =
-    vipList.find((vip) => ctx.from?.username === vip)?.length > 0;
+  const isVipKazakh = !!vipList[ctx.from?.id];
 
   if (isVipKazakh) {
     apchuSize += 10;
