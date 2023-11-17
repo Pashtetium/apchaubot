@@ -1,25 +1,24 @@
 {
   "name": "apshubot",
   "version": "1.0.0",
-  "description": "telegram bot for measuring apshu size",
+  "description": "Telegram bot for measuring apshu size",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "build": "tsc --project tsconfig.json"
+    "build": "npx tsc --project tsconfig.json && cp ./Procfile ./dist",
+    "start": "npm run build && node --env-file=.env dist/index.js"
   },
   "author": "pashtetium",
   "license": "ISC",
-  "dependencies": {},
   "engines": {
-    "node": "16.13.0",
-    "npm": "8.1"
+    "node": "v20.9.0",
+    "npm": "10.1.0"
   },
   "devDependencies": {
-    "telegraf": "^4.7.0",
-    "dotenv": "^16.0.0",
     "@types/node": "^18.15.11",
+    "mongodb": "^5.1.0",
+    "telegraf": "^4.7.0",
     "typegram": "^5.0.0",
-    "mongodb": "^5.1.0"
+    "typescript": "^5.2.2"
   }
 }

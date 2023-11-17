@@ -3,7 +3,7 @@ export const getEmoji = (size: number): string => {
     case 3:
     case 4:
     case 5:
-      return "Сегодня холодно 🥶";
+      return "Холодно 🥶";
     case 6:
     case 7:
     case 8:
