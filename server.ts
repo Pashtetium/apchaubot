@@ -1,14 +1,26 @@
 import { Telegraf, Context } from "telegraf";
 import { getApchuSize } from "./apchuSize.js";
 import { getEmoji } from "./emoji.js";
-import { isVipUser } from "./vip-list.js";
 import { MongoDbDriver, Stats } from "./storage/mongodb/mongoDbDriver.js";
+import express from "express";
+const app = express();
 
-async function main() {
+app.get("/", (req: any, res: any) => {
+  res.send("Hello from App Engine!");
+});
+
+// Listen to the App Engine-specified port, or 8080 otherwise
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}...`);
+});
+
+async function initBot() {
   const connectionString = process.env.MONGODB_CONNECTION_STRING;
 
   if (!process.env.BOT_TOKEN || !connectionString) {
-    throw new Error("Env variables not found");
+    console.dir("Env variables not found");
+    return;
   }
 
   const mongo = new MongoDbDriver(connectionString);
@@ -16,7 +28,7 @@ async function main() {
   try {
     await mongo.openConnection();
   } catch (e) {
-    console.error(e);
+    console.dir(e);
   }
 
   const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -24,15 +36,8 @@ async function main() {
   bot.on("inline_query", async (ctx: Context) => {
     let apchuSize = getApchuSize();
     const emoji = getEmoji(apchuSize);
-    const isVipKazakh = isVipUser(ctx.from?.id);
 
-    if (isVipKazakh) {
-      apchuSize += 10;
-    }
-
-    const answer = `Сегодня ты дал Апщу на ${apchuSize}см. ${
-      isVipKazakh ? "😎(vip)😎" : emoji
-    }`;
+    const answer = `Сегодня ты дал Апщу на ${apchuSize}см. ${emoji}`;
 
     const stats: Stats = {
       userId: ctx.from?.id,
@@ -43,15 +48,14 @@ async function main() {
     };
 
     try {
-      const savedStats = await mongo.saveStats(stats);
-      console.info(savedStats);
+      await mongo.saveStats(stats);
     } catch (e) {
       console.error(e);
     }
 
     const averageSize = await mongo.getAverageSizeForUser(ctx.from?.id);
 
-    const statsAnswer = `Твой средний размер за всё время - ${getEmoji(
+    const statsAnswer = `Твой средний размер за всё время - ${averageSize}см. ${getEmoji(
       averageSize
     )}`;
 
@@ -93,4 +97,4 @@ async function main() {
   });
 }
 
-main();
+initBot();

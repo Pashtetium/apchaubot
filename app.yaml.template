@@ -1,0 +1,4 @@
+runtime: nodejs20
+env_variables:
+  MONGODB_CONNECTION_STRING: ""
+  BOT_TOKEN: ""

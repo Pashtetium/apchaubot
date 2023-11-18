@@ -25,7 +25,7 @@ export class MongoDbDriver {
     } catch (e) {
       throw e;
     } finally {
-      console.info("Successfully connected to MongoDB");
+      console.dir("Successfully connected to MongoDB");
     }
   }
 
@@ -35,7 +35,7 @@ export class MongoDbDriver {
         .db("apshu-stats")
         .collection("stats")
         .insertOne(stats);
-      console.log(result);
+      console.dir(result);
     } catch (e) {
       throw e;
     }
@@ -45,9 +45,9 @@ export class MongoDbDriver {
     try {
       await this.client.close();
     } catch (e) {
-      console.error(e);
+      console.dir(e);
     } finally {
-      console.info("Successfully closed connection to MongoDB");
+      console.dir("Successfully closed connection to MongoDB");
     }
   }
 
@@ -65,7 +65,7 @@ export class MongoDbDriver {
 
       const totalSize = docs.reduce((acc, doc) => acc + doc.apchuSize, 0);
 
-      return totalSize / docs.length;
+      return Math.round(totalSize / docs.length);
     } catch (e) {
       throw e;
     }
