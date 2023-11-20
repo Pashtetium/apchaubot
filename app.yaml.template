@@ -2,3 +2,9 @@ runtime: nodejs20
 env_variables:
   MONGODB_CONNECTION_STRING: ""
   BOT_TOKEN: ""
+automatic_scaling:
+  min_idle_instances: automatic
+  max_idle_instances: 1
+  min_pending_latency: automatic
+  max_pending_latency: 0.030s
+  max_instances: 1
