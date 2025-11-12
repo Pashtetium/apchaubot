@@ -9,7 +9,7 @@ VOLUME_CONFIG="apchaubot-config"
 VOLUME_LOGS="apchaubot-logs"
 
 # Set your Docker Hub username here
-DOCKER_USERNAME="${DOCKER_USERNAME:-your_dockerhub_username}"
+DOCKER_USERNAME="${DOCKER_USERNAME:-pashtetium}"
 IMAGE_NAME="${DOCKER_USERNAME}/apchaubot:latest"
 
 # Colors

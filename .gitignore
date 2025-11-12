@@ -1,5 +1,36 @@
+# Dependencies
 node_modules
+npm-debug.log
+
+# Environment files (IMPORTANT: never commit secrets!)
 .env
+.env.local
+.env.*.local
+
+# Build output
 dist
-app.yaml
 *.js
+*.js.map
+
+# Google Cloud
+app.yaml
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Documentation - DO NOT ignore these!
+# We want these committed:
+# !README.md
+# !DEPLOYMENT.md
+# !AUTO-UPDATES.md
+# !QUICK-START.md
+# etc.
