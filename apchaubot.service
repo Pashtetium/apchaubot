@@ -1,0 +1,21 @@
+[Unit]
+Description=Apchubot Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/student/apchaubot
+ExecStart=/home/student/apchaubot/start-bot.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# The start-bot.sh script will load environment variables from .env file
+# Make sure /home/student/apchaubot/.env exists with:
+# BOT_TOKEN=your_token_here
+# MONGODB_CONNECTION_STRING=your_mongodb_uri_here
+# PORT=8080
+
+[Install]
+WantedBy=default.target

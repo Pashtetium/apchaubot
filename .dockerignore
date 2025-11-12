@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+npm-debug.log
+
+# Environment files (secrets should be passed at runtime)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# Google Cloud
+.gcloudignore
+app.yaml
+app.yaml.template
+
+# Build artifacts (will be generated in container)
+*.js
+*.js.map
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+*.md
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Misc
+.editorconfig

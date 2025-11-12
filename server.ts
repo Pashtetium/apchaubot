@@ -3,13 +3,9 @@ import { getApchuSize } from "./apchuSize.js";
 import { getEmoji } from "./emoji.js";
 import { MongoDbDriver, Stats } from "./storage/mongodb/mongoDbDriver.js";
 import express from "express";
+
 const app = express();
 
-app.get("/", (req: any, res: any) => {
-  res.send("Hello from App Engine!");
-});
-
-// Listen to the App Engine-specified port, or 8080 otherwise
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
@@ -86,7 +82,6 @@ async function initBot() {
 
   bot.launch();
 
-  // Enable graceful stop
   process.once("SIGINT", async () => {
     await mongo.closeConnection();
     bot.stop("SIGINT");
