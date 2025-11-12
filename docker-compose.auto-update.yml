@@ -3,7 +3,7 @@ version: "3.8"
 services:
   apchaubot:
     # Use pre-built image from Docker Hub instead of building locally
-    image: ${DOCKER_USERNAME:-your_dockerhub_username}/apchaubot:latest
+    image: pashtetium/apchaubot:latest
     container_name: apchaubot
     restart: unless-stopped
     ports:
