@@ -39,6 +39,13 @@ RUN npm ci --only=production && \
 COPY --from=builder /app/*.js ./
 COPY --from=builder /app/storage/ ./storage/
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Create directories for volumes
+RUN mkdir -p /app/config /app/logs
+
 # Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app
 
@@ -52,5 +59,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:8080', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application
-CMD ["node", "server.js"]
+# Use entrypoint script to load .env from volume
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

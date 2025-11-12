@@ -9,12 +9,18 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - MONGODB_CONNECTION_STRING=${MONGODB_CONNECTION_STRING}
+      - PORT=8080
+      - NODE_ENV=production
+    # Mount .env file from persistent storage
+    # IMPORTANT: Update PERSISTENT_DIR to your actual persistent directory path
+    env_file:
+      - ${PERSISTENT_DIR:-.}/persistent/.env
+    # Optional: Mount logs directory for persistent logging
     volumes:
-      # Named volume for persistent config (stores .env file)
-      # The docker-entrypoint.sh script loads .env from here
-      - apchaubot-config:/app/config
-      # Named volume for persistent logs
-      - apchaubot-logs:/app/logs
+      - ${PERSISTENT_DIR:-.}/persistent/logs:/app/logs
     healthcheck:
       test:
         [
@@ -27,10 +33,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-# Named volumes - stored in /var/lib/docker/volumes/ (persists!)
-volumes:
-  apchaubot-config:
-    name: apchaubot-config
-  apchaubot-logs:
-    name: apchaubot-logs
