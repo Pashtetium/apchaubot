@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  apchaubot:
+    # Use pre-built image from Docker Hub instead of building locally
+    image: ${DOCKER_USERNAME:-your_dockerhub_username}/apchaubot:latest
+    container_name: apchaubot
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Named volumes for persistent config and logs
+      - apchaubot-config:/app/config
+      - apchaubot-logs:/app/logs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:8080', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      # Watchtower will monitor this container
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # Watchtower - automatically updates containers
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: apchaubot-watchtower
+    restart: unless-stopped
+    volumes:
+      # Watchtower needs access to Docker socket
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # Check for updates every 5 minutes (300 seconds)
+      - WATCHTOWER_POLL_INTERVAL=300
+      # Only update containers with the watchtower.enable label
+      - WATCHTOWER_LABEL_ENABLE=true
+      # Clean up old images after updating
+      - WATCHTOWER_CLEANUP=true
+      # Include stopped containers
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      # Log level (info, debug, trace)
+      - WATCHTOWER_DEBUG=false
+      # Notification URL (optional - see docs for Slack, Discord, etc.)
+      # - WATCHTOWER_NOTIFICATION_URL=
+    command: --interval 300 --label-enable --cleanup
+
+# Named volumes - stored in /var/lib/docker/volumes/ (persists!)
+volumes:
+  apchaubot-config:
+    name: apchaubot-config
+  apchaubot-logs:
+    name: apchaubot-logs
