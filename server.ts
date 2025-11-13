@@ -4,6 +4,7 @@ import { getEmoji } from "./emoji.js";
 import { MongoDbDriver, Stats } from "./storage/mongodb/mongoDbDriver.js";
 import express from "express";
 import { isVipUser } from "./vip-list.js";
+import { isUltraVipUser } from "./vip-list.js";
 
 const app = express();
 
@@ -33,13 +34,18 @@ async function initBot() {
   bot.on("inline_query", async (ctx: Context) => {
     let apchuSize = getApchuSize();
     const isVip = isVipUser(ctx.from?.id);
+    const isUltraVip = isVipUser(ctx.from?.id);
     if (isVip) {
       apchuSize += 5;
     }
 
+      if (isUltraVip) {
+      apchuSize += 50;
+    }
+
     const emoji = getEmoji(apchuSize);
     const answer = `Сегодня ты дал Апщу на ${apchuSize}см. ${emoji} ${
-      isVip ? "💎ᴠɪᴘ💎" : ""
+      isUltraVip ? "⭐ULTRA VIP⭐" : isVip ? "💎ᴠɪᴘ💎" : ""
     }`;
 
     const stats: Stats = {
