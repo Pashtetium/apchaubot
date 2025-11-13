@@ -34,7 +34,7 @@ async function initBot() {
   bot.on("inline_query", async (ctx: Context) => {
     let apchuSize = getApchuSize();
     const isVip = isVipUser(ctx.from?.id);
-    const isUltraVip = isVipUser(ctx.from?.id);
+    const isUltraVip = isUltraVipUser(ctx.from?.id);
     if (isVip) {
       apchuSize += 5;
     }
