@@ -25,3 +25,16 @@ export function isVipUser(id: number | undefined): boolean {
 
   return !!users[id];
 }
+
+
+export function isUltraVipUser(id: number | undefined): boolean {
+  if (!id) {
+    return false;
+  }
+
+  const users: VipUsers = {
+    998133479: "kavelpim123",
+  };
+
+  return !!users[id];
+}
