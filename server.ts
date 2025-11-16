@@ -199,6 +199,22 @@ async function setupBot(BOT_TOKEN: string, mongoClient: MongoDbDriver) {
     }
   });
 
+  bot.command("shutdown", async (ctx: Context) => {
+    if (!isAdmin(ctx.from?.id)) {
+      await ctx.reply("У вас нет прав для выполнения этой команды.");
+      return;
+    }
+
+    await ctx.reply("Останавливаю бота...");
+    console.log("Shutdown command received from admin, stopping bot...");
+
+    setTimeout(async () => {
+      await mongoClient.closeConnection();
+      bot.stop();
+      process.exit(0);
+    }, 1000);
+  });
+
   bot.launch();
 
   return bot;
