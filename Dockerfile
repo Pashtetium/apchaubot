@@ -15,6 +15,7 @@ COPY server.ts ./
 COPY apchuSize.ts ./
 COPY emoji.ts ./
 COPY vip-list.ts ./
+COPY admin-list.ts ./
 COPY storage/ ./storage/
 
 # Build TypeScript to JavaScript
