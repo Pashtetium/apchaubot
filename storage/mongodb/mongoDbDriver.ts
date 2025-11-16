@@ -80,11 +80,14 @@ export class MongoDbDriver {
   async addSponsor(name: string, url: string) {
     try {
       const sponsor: Sponsor = { name, url };
-      await this.client
+      console.log(`Adding sponsor to db: ${this.dbName}, collection: ${this.sponsorsCollectionName}`, sponsor);
+      const result = await this.client
         .db(this.dbName)
         .collection(this.sponsorsCollectionName)
         .insertOne(sponsor);
+      console.log("Sponsor added successfully:", result.insertedId);
     } catch (e) {
+      console.error("Error adding sponsor:", e);
       throw e;
     }
   }
@@ -102,14 +105,17 @@ export class MongoDbDriver {
 
   async getSponsors(): Promise<Sponsor[]> {
     try {
+      console.log(`Fetching sponsors from db: ${this.dbName}, collection: ${this.sponsorsCollectionName}`);
       const sponsors = await this.client
         .db(this.dbName)
         .collection<Sponsor>(this.sponsorsCollectionName)
         .find({})
         .toArray();
 
+      console.log(`Found ${sponsors.length} sponsors`);
       return sponsors;
     } catch (e) {
+      console.error("Error fetching sponsors:", e);
       throw e;
     }
   }

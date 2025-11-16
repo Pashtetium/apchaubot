@@ -50,6 +50,10 @@ function setupGracefulShutdown(bot: Telegraf, mongoClient: MongoDbDriver) {
     await mongoClient.closeConnection();
     bot.stop("SIGTERM");
   });
+  process.once("SIGHUP", async () => {
+    await mongoClient.closeConnection();
+    bot.stop("SIGHUP");
+  });
 }
 
 async function setupBot(BOT_TOKEN: string, mongoClient: MongoDbDriver) {
@@ -79,6 +83,7 @@ async function setupBot(BOT_TOKEN: string, mongoClient: MongoDbDriver) {
     )}`;
 
     const sponsors = await mongoClient.getSponsors();
+    console.log("Fetched sponsors:", sponsors);
     let sponsorsAnswer = "Список спонсоров:\n\n";
     if (sponsors.length === 0) {
       sponsorsAnswer += "Пока нет спонсоров.";
