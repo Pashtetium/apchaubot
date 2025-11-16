@@ -5,31 +5,55 @@ import { MongoDbDriver, Stats } from "./storage/mongodb/mongoDbDriver.js";
 import express from "express";
 import { isVipUser } from "./vip-list.js";
 import { isUltraVipUser } from "./vip-list.js";
+import { isAdmin } from "./admin-list.js";
 
-const app = express();
-
+const BOT_TOKEN = process.env.BOT_TOKEN;
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}...`);
-});
+const dbConnectionString = process.env.MONGODB_CONNECTION_STRING;
 
-async function initBot() {
-  const connectionString = process.env.MONGODB_CONNECTION_STRING;
-
-  if (!process.env.BOT_TOKEN || !connectionString) {
-    console.dir("Env variables not found");
+async function init() {
+  if (!BOT_TOKEN || !dbConnectionString) {
+    console.error("Env variables not found");
     return;
   }
 
-  const mongo = new MongoDbDriver(connectionString);
+  const [mongoClient, err] = await setupStorage(dbConnectionString);
+  if (!mongoClient) throw err;
 
-  try {
-    await mongo.openConnection();
-  } catch (e) {
-    console.dir(e);
-  }
+  const bot = await setupBot(BOT_TOKEN, mongoClient);
 
-  const bot = new Telegraf(process.env.BOT_TOKEN);
+  setupGracefulShutdown(bot, mongoClient);
+
+  setupRoutes();
+}
+
+init();
+
+function setupRoutes() {
+  const app = express();
+
+  app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}...`);
+  });
+}
+
+function setupGracefulShutdown(bot: Telegraf, mongoClient: MongoDbDriver) {
+  process.once("SIGINT", async () => {
+    await mongoClient.closeConnection();
+    bot.stop("SIGINT");
+  });
+  process.once("SIGTERM", async () => {
+    await mongoClient.closeConnection();
+    bot.stop("SIGTERM");
+  });
+}
+
+async function setupBot(BOT_TOKEN: string, mongoClient: MongoDbDriver) {
+  const bot = new Telegraf(BOT_TOKEN);
 
   bot.on("inline_query", async (ctx: Context) => {
     let apchuSize = getApchuSize();
@@ -39,7 +63,7 @@ async function initBot() {
       apchuSize += 5;
     }
 
-      if (isUltraVip) {
+    if (isUltraVip) {
       apchuSize += 50;
     }
 
@@ -48,30 +72,26 @@ async function initBot() {
       isUltraVip ? "⭐ULTRA VIP⭐" : isVip ? "💎ᴠɪᴘ💎" : ""
     }`;
 
-    const stats: Stats = {
-      userId: ctx.from?.id,
-      firstName: ctx.from?.first_name,
-      lastName: ctx.from?.last_name,
-      userName: ctx.from?.username,
-      apchuSize,
-    };
-
-    try {
-      await mongo.saveStats(stats);
-    } catch (e) {
-      console.error(e);
-    }
-
-    const averageSize = await mongo.getAverageSizeForUser(ctx.from?.id);
+    const averageSize = await mongoClient.getAverageSizeForUser(ctx.from?.id);
 
     const statsAnswer = `Твой средний размер за всё время - ${averageSize}см. ${getEmoji(
       averageSize
     )}`;
 
+    const sponsors = await mongoClient.getSponsors();
+    let sponsorsAnswer = "Список спонсоров:\n\n";
+    if (sponsors.length === 0) {
+      sponsorsAnswer += "Пока нет спонсоров.";
+    } else {
+      sponsors.forEach((sponsor, index) => {
+        sponsorsAnswer += `${index + 1}. [${sponsor.name}](${sponsor.url})\n`;
+      });
+    }
+
     ctx.answerInlineQuery(
       [
         {
-          id: "1",
+          id: `apchu_${apchuSize}`,
           type: "article",
           title: "Апщу бер",
           input_message_content: {
@@ -80,7 +100,7 @@ async function initBot() {
           description: "Покажет, насколько большой у тебя апщу",
         },
         {
-          id: "2",
+          id: "stats",
           type: "article",
           title: "Твоя статистика",
           input_message_content: {
@@ -88,21 +108,106 @@ async function initBot() {
           },
           description: "Покажет твой средний размер",
         },
+        {
+          id: "sponsors",
+          type: "article",
+          title: "Список спонсоров",
+          input_message_content: {
+            message_text: sponsorsAnswer,
+            parse_mode: "Markdown",
+          },
+          description: "Показать список спонсоров",
+        },
       ],
       { is_personal: true, cache_time: 43200 }
     );
   });
 
+  bot.on("chosen_inline_result", async (ctx: Context) => {
+    const resultId = ctx.chosenInlineResult?.result_id;
+
+    if (resultId?.startsWith("apchu_")) {
+      const apchuSize = parseInt(resultId.replace("apchu_", ""), 10);
+
+      const stats: Stats = {
+        userId: ctx.from?.id,
+        firstName: ctx.from?.first_name,
+        lastName: ctx.from?.last_name,
+        userName: ctx.from?.username,
+        apchuSize,
+      };
+
+      try {
+        await mongoClient.saveStats(stats);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  });
+
+  bot.command("addsponsor", async (ctx: Context) => {
+    if (!isAdmin(ctx.from?.id)) {
+      await ctx.reply("У вас нет прав для выполнения этой команды.");
+      return;
+    }
+
+    const messageText = ctx.message && "text" in ctx.message ? ctx.message.text : undefined;
+    const args = messageText?.split(" ").slice(1);
+    if (!args || args.length < 2) {
+      await ctx.reply("Использование: /addsponsor <название> <ссылка>");
+      return;
+    }
+
+    const name = args[0];
+    const url = args.slice(1).join(" ");
+
+    try {
+      await mongoClient.addSponsor(name, url);
+      await ctx.reply(`Спонсор "${name}" успешно добавлен!`);
+    } catch (e) {
+      console.error(e);
+      await ctx.reply("Ошибка при добавлении спонсора.");
+    }
+  });
+
+  bot.command("removesponsor", async (ctx: Context) => {
+    if (!isAdmin(ctx.from?.id)) {
+      await ctx.reply("У вас нет прав для выполнения этой команды.");
+      return;
+    }
+
+    const messageText = ctx.message && "text" in ctx.message ? ctx.message.text : undefined;
+    const args = messageText?.split(" ").slice(1);
+    if (!args || args.length < 1) {
+      await ctx.reply("Использование: /removesponsor <название>");
+      return;
+    }
+
+    const name = args.join(" ");
+
+    try {
+      await mongoClient.removeSponsor(name);
+      await ctx.reply(`Спонсор "${name}" успешно удален!`);
+    } catch (e) {
+      console.error(e);
+      await ctx.reply("Ошибка при удалении спонсора.");
+    }
+  });
+
   bot.launch();
 
-  process.once("SIGINT", async () => {
-    await mongo.closeConnection();
-    bot.stop("SIGINT");
-  });
-  process.once("SIGTERM", async () => {
-    await mongo.closeConnection();
-    bot.stop("SIGTERM");
-  });
+  return bot;
 }
 
-initBot();
+async function setupStorage(
+  dbConnectionString: string
+): Promise<[MongoDbDriver, null] | [null, unknown]> {
+  const mongo = new MongoDbDriver(dbConnectionString);
+
+  try {
+    await mongo.openConnection();
+    return [mongo, null];
+  } catch (e) {
+    return [null, e];
+  }
+}

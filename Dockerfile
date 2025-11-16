@@ -57,7 +57,7 @@ EXPOSE 8080
 
 # Health check (pings the Express server)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:8080', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+    CMD node -e "require('http').get('http://localhost:8080/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Use entrypoint script to load .env from volume
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
