@@ -11,6 +11,8 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const PORT = process.env.PORT || 8080;
 const dbConnectionString = process.env.MONGODB_CONNECTION_STRING;
 
+let httpServer: any;
+
 async function init() {
   if (!BOT_TOKEN || !dbConnectionString) {
     console.error("Env variables not found");
@@ -20,11 +22,11 @@ async function init() {
   const [mongoClient, err] = await setupStorage(dbConnectionString);
   if (!mongoClient) throw err;
 
+  httpServer = setupRoutes();
+
   const bot = await setupBot(BOT_TOKEN, mongoClient);
 
   setupGracefulShutdown(bot, mongoClient);
-
-  setupRoutes();
 }
 
 init();
@@ -36,9 +38,11 @@ function setupRoutes() {
     res.status(200).json({ status: "ok" });
   });
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}...`);
   });
+
+  return server;
 }
 
 function setupGracefulShutdown(bot: Telegraf, mongoClient: MongoDbDriver) {
@@ -209,8 +213,18 @@ async function setupBot(BOT_TOKEN: string, mongoClient: MongoDbDriver) {
     console.log("Shutdown command received from admin, stopping bot...");
 
     setTimeout(async () => {
+      console.log("Closing HTTP server...");
+      httpServer.close(() => {
+        console.log("HTTP server closed");
+      });
+
+      console.log("Closing MongoDB connection...");
       await mongoClient.closeConnection();
+
+      console.log("Stopping bot...");
       bot.stop();
+
+      console.log("Exiting process...");
       process.exit(0);
     }, 1000);
   });
