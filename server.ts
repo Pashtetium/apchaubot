@@ -128,7 +128,7 @@ async function setupBot(BOT_TOKEN: string, mongoClient: MongoDbDriver) {
           description: "Показать список спонсоров",
         },
       ],
-      { is_personal: true, cache_time: 43200 }
+      { is_personal: true, cache_time: 0 }
     );
   });
 
